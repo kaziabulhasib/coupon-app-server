@@ -23,16 +23,14 @@ export const claimCoupon = async (req, res) => {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const existingClaim = await Claim.findOne({
       ipAddress: userIp,
-      createdAt: { $gt: oneHourAgo },
+      claimedAt: { $gt: oneHourAgo }, // ✅ Correct field name
     });
 
     if (existingClaim) {
-      return res
-        .status(429)
-        .json({
-          message:
-            "You have already claimed a coupon. Please try again after 1 hour.",
-        });
+      return res.status(429).json({
+        message:
+          "You have already claimed a coupon. Please try again after 1 hour.",
+      });
     }
 
     // Assign a coupon
@@ -41,7 +39,11 @@ export const claimCoupon = async (req, res) => {
     await counter.save();
 
     // Save the claim with IP tracking
-    await Claim.create({ ipAddress: userIp, userCookie });
+    await Claim.create({
+      ipAddress: userIp,
+      userCookie,
+      claimedAt: new Date(),
+    });
 
     // Set cookie for tracking (browser session-based)
     res.cookie("coupon_token", userCookie, { maxAge: 3600000, httpOnly: true });
