@@ -19,17 +19,17 @@ export const claimCoupon = async (req, res) => {
     const userCookie =
       req.cookies?.coupon_token || new Date().getTime().toString();
 
-    // Check if this IP has claimed within the last 1 hour
+   
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     const existingClaim = await Claim.findOne({
       ipAddress: userIp,
-      claimedAt: { $gt: oneHourAgo }, // ✅ Correct field name
+      claimedAt: { $gt: oneHourAgo }, 
     });
 
     if (existingClaim) {
       // Calculate remaining time
       const timePassed = (Date.now() - existingClaim.claimedAt.getTime()) / 1000; // in seconds
-      const timeRemaining = 3600 - timePassed; // 1 hour - timePassed
+      const timeRemaining = 3600 - timePassed;
 
       const minutes = Math.floor(timeRemaining / 60);
       const seconds = Math.floor(timeRemaining % 60);
